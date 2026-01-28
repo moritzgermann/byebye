@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persönliche Entscheidungsmatrix - Wegzug Schweiz</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        canvas {
+            max-height: 350px;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .summary-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .summary-item {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .summary-score {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .legend-box {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .legend-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .legend-text {
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Persönliche Entscheidungsmatrix</h1>
+        <p class="subtitle">Strategische Bewertung: Wegzug in die Schweiz</p>
+        
+        <div class="charts-grid">
+            <!-- Radar Chart -->
+            <div class="chart-container">
+                <div class="chart-title">Vergleich aller Kriterien</div>
+                <canvas id="radarChart"></canvas>
+            </div>
+            
+            <!-- Bar Chart -->
+            <div class="chart-container">
+                <div class="chart-title">Einzelbewertung nach Kriterien</div>
+                <canvas id="barChart"></canvas>
+            </div>
+            
+            <!-- Weighted Comparison -->
+            <div class="chart-container">
+                <div class="chart-title">Gewichteter Gesamtscore</div>
+                <canvas id="totalScoreChart"></canvas>
+            </div>
+            
+            <!-- Stacked Bar Chart -->
+            <div class="chart-container">
+                <div class="chart-title">Gewichtete Punkte pro Kriterium</div>
+                <canvas id="stackedChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="summary-box">
+            <div class="summary-title">Gesamtbewertung (gewichtet)</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-score">7,25</div>
+                    <div class="summary-label">In Deutschland bleiben</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-score">5,85</div>
+                    <div class="summary-label">Sofort wegziehen</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-score">6,70</div>
+                    <div class="summary-label">In 2-3 Jahren wegziehen</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend-box">
+            <div class="legend-title">Kriterien-Gewichtung</div>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #8b5cf6;"></div>
+                    <div class="legend-text">Steuerersparnis (30%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3b82f6;"></div>
+                    <div class="legend-text">Liquidität kurzfristig (25%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #10b981;"></div>
+                    <div class="legend-text">Flexibilität/Reversibilität (20%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <div class="legend-text">Operative Komplexität (15%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ef4444;"></div>
+                    <div class="legend-text">Lebensqualität (10%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const criteria = [
+            'Steuerersparnis',
+            'Liquidität kurzfristig',
+            'Flexibilität/Reversibilität',
+            'Operative Komplexität',
+            'Lebensqualität'
+        ];
+        
+        const weights = [30, 25, 20, 15, 10];
+        
+        const scores = {
+            germany: [0, 10, 10, 10, 7],
+            immediate: [9, 3, 4, 5, 9],
+            later: [5, 8, 7, 7, 8]
+        };
+        
+        const colors = {
+            germany: 'rgba(239, 68, 68, 0.7)',
+            immediate: 'rgba(59, 130, 246, 0.7)',
+            later: 'rgba(16, 185, 129, 0.7)'
+        };
+        
+        const borderColors = {
+            germany: 'rgb(239, 68, 68)',
+            immediate: 'rgb(59, 130, 246)',
+            later: 'rgb(16, 185, 129)'
+        };
+
+        // Radar Chart
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: criteria,
+                datasets: [
+                    {
+                        label: 'In DE bleiben',
+                        data: scores.germany,
+                        backgroundColor: colors.germany,
+                        borderColor: borderColors.germany,
+                        borderWidth: 2,
+                        pointBackgroundColor: borderColors.germany,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: borderColors.germany
+                    },
+                    {
+                        label: 'Sofort wegziehen',
+                        data: scores.immediate,
+                        backgroundColor: colors.immediate,
+                        borderColor: borderColors.immediate,
+                        borderWidth: 2,
+                        pointBackgroundColor: borderColors.immediate,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: borderColors.immediate
+                    },
+                    {
+                        label: 'In 2-3 Jahren',
+                        data: scores.later,
+                        backgroundColor: colors.later,
+                        borderColor: borderColors.later,
+                        borderWidth: 2,
+                        pointBackgroundColor: borderColors.later,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: borderColors.later
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2,
+                            font: { size: 12 }
+                        },
+                        pointLabels: {
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+
+        // Bar Chart
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: criteria,
+                datasets: [
+                    {
+                        label: 'In DE bleiben',
+                        data: scores.germany,
+                        backgroundColor: colors.germany,
+                        borderColor: borderColors.germany,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Sofort wegziehen',
+                        data: scores.immediate,
+                        backgroundColor: colors.immediate,
+                        borderColor: borderColors.immediate,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'In 2-3 Jahren',
+                        data: scores.later,
+                        backgroundColor: colors.later,
+                        borderColor: borderColors.later,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: { stepSize: 2 }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+
+        // Total Score Chart
+        const totalCtx = document.getElementById('totalScoreChart').getContext('2d');
+        new Chart(totalCtx, {
+            type: 'bar',
+            data: {
+                labels: ['In DE bleiben', 'Sofort wegziehen', 'In 2-3 Jahren'],
+                datasets: [{
+                    label: 'Gesamtscore (gewichtet)',
+                    data: [7.25, 5.85, 6.70],
+                    backgroundColor: [
+                        colors.germany,
+                        colors.immediate,
+                        colors.later
+                    ],
+                    borderColor: [
+                        borderColors.germany,
+                        borderColors.immediate,
+                        borderColors.later
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Score: ' + context.parsed.x.toFixed(2) + ' / 10';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Stacked Chart - Weighted Points
+        const weightedScores = {
+            germany: scores.germany.map((s, i) => (s * weights[i]) / 100),
+            immediate: scores.immediate.map((s, i) => (s * weights[i]) / 100),
+            later: scores.later.map((s, i) => (s * weights[i]) / 100)
+        };
+
+        const stackedCtx = document.getElementById('stackedChart').getContext('2d');
+        new Chart(stackedCtx, {
+            type: 'bar',
+            data: {
+                labels: ['In DE bleiben', 'Sofort wegziehen', 'In 2-3 Jahren'],
+                datasets: criteria.map((criterion, index) => ({
+                    label: criterion,
+                    data: [
+                        weightedScores.germany[index],
+                        weightedScores.immediate[index],
+                        weightedScores.later[index]
+                    ],
+                    backgroundColor: [
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ][index]
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { 
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 10, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' Punkte';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
